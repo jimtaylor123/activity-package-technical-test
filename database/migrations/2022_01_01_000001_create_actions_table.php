@@ -14,9 +14,13 @@ return new class extends Migration {
     {
         Schema::create('actions', function(Blueprint $table) {
             $table->id();
-
-            // TODO: Create actions table
-
+            $table->enum('type', ['create', 'update', 'delete']);
+            $table->integer('performerable_id');
+            $table->index('performerable_id');
+            $table->string('performerable_type');
+            $table->integer('subjectable_id');
+            $table->index('subjectable_id');
+            $table->string('subjectable_type');
             $table->timestamps();
         });
     }

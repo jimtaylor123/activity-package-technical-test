@@ -20,5 +20,11 @@ class ActivityServiceProvider extends ServiceProvider
         ]);
         
         $this->loadMigrationsFrom(__DIR__.'/../database/migrations/');
+
+        $this->loadTranslationsFrom(__DIR__.'/../lang', 'activity-package-technical-test');
+
+        $this->publishes([
+            __DIR__.'/../lang' => $this->app->langPath('vendor/activity-package-technical-test'),
+        ]);
     }
 }

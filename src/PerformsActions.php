@@ -4,7 +4,12 @@ declare(strict_types=1);
 
 namespace Activity;
 
+use Activity\Action;
+
 trait PerformsActions
 {
-    // TODO: Write trait for models that perform actions, e.g. User
+    public function actionsPerformed()
+    {
+        return $this->morphMany(Action::class, 'performerable');
+    }
 }
