@@ -4,8 +4,9 @@ declare(strict_types=1);
 
 namespace Activity\Tests;
 
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Activity\Action;
 use Illuminate\Support\Str;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 
 class ActivityTest extends TestCase
 {
@@ -28,6 +29,8 @@ class ActivityTest extends TestCase
      */
     public function when_a_tracked_model_is_created_an_action_is_saved(): void
     {
+        $this->freezeTime();
+
         $user = $this->createUser();
 
         $this->be($user);
@@ -37,10 +40,12 @@ class ActivityTest extends TestCase
             'body' => 'Test body',
         ]);
 
-        static::assertCount(1, $post->actions);
-        static::assertCount(1, $user->performedActions);
-        static::assertSame('The model was created', $post->actions->first()->getDescription());
-        static::assertTrue($post->actions->first()->is($user->performedActions->first()));
+        $action = $post->actionsSubjected->first();
+
+        static::assertCount(1, $post->actionsSubjected);
+        static::assertCount(1, $user->actionsPerformed);
+        static::assertSame($this->expectedDescription($user, $action), $action->description());
+        static::assertTrue($post->actionsSubjected->first()->is($user->actionsPerformed->first()));
     }
 
     /**
@@ -49,6 +54,8 @@ class ActivityTest extends TestCase
      */
     public function when_a_tracked_model_is_updated_an_action_is_saved(): void
     {
+        $this->freezeTime();
+
         $user = $this->createUser();
 
         $this->be($user);
@@ -61,10 +68,12 @@ class ActivityTest extends TestCase
         $post->title = 'Test title';
         $post->save();
 
-        static::assertCount(2, $post->actions);
-        static::assertCount(2, $user->performedActions);
-        static::assertSame('The model was updated', $post->actions->last()->getDescription());
-        static::assertTrue($post->actions->last()->is($user->performedActions->last()));
+        $action = $post->actionsSubjected->last();
+
+        static::assertCount(2, $post->actionsSubjected);
+        static::assertCount(2, $user->actionsPerformed);
+        static::assertSame($this->expectedDescription($user, $action), $post->actionsSubjected->last()->description());
+        static::assertTrue($post->actionsSubjected->last()->is($user->actionsPerformed->last()));
     }
 
     /**
@@ -73,6 +82,8 @@ class ActivityTest extends TestCase
      */
     public function when_a_tracked_model_is_deleted_an_action_is_saved(): void
     {
+        $this->freezeTime();
+
         $user = $this->createUser();
 
         $this->be($user);
@@ -84,7 +95,15 @@ class ActivityTest extends TestCase
 
         $post->delete();
 
-        static::assertCount(2, $user->performedActions);
-        static::assertSame('The model was deleted', $user->performedActions->last()->getDescription());
+        $action = $post->actionsSubjected->last();
+
+        static::assertCount(2, $user->actionsPerformed);
+        static::assertSame($this->expectedDescription($user, $action), $user->actionsPerformed->last()->description());
+    }
+
+    private function expectedDescription(User $user, Action $action): string
+    {
+        $date = now()->toDateTimeString();
+        return "$user->name (id $user->id) performed the action '$action->type' on '$action->subjectable_type' id number $action->subjectable_id at $date";
     }
 }

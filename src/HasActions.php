@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Activity;
 
-use App\Models\User;
+use Illuminate\Support\Facades\Auth;
 use function Illuminate\Events\queueable;
 
 trait HasActions
@@ -14,8 +14,8 @@ trait HasActions
         static::created(queueable(function ($model) {
             Action::create([
                 'type' => 'create',
-                'performerable_id' => request()->user()->id,
-                'performerable_type' => User::class,
+                'performerable_id' => Auth::user()->id,
+                'performerable_type' => Auth::user()::class,
                 'subjectable_id' => $model->id,
                 'subjectable_type' => $model::class,
             ]);
@@ -24,8 +24,8 @@ trait HasActions
         static::updated(queueable(function ($model) {
             Action::create([
                 'type' => 'update',
-                'performerable_id' => request()->user()->id,
-                'performerable_type' => User::class,
+                'performerable_id' => Auth::user()->id,
+                'performerable_type' => Auth::user()::class,
                 'subjectable_id' => $model->id,
                 'subjectable_type' => $model::class,
             ]);
@@ -34,8 +34,8 @@ trait HasActions
         static::deleted(queueable(function ($model) {
             Action::create([
                 'type' => 'delete',
-                'performerable_id' => request()->user()->id,
-                'performerable_type' => User::class,
+                'performerable_id' => Auth::user()->id,
+                'performerable_type' => Auth::user()::class,
                 'subjectable_id' => $model->id,
                 'subjectable_type' => $model::class,
             ]);
